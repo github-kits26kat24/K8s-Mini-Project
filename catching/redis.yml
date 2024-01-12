@@ -1,0 +1,62 @@
+# for k8s versions before 1.9.0 use apps/v1beta2 and before 1.8.0 use extensions/v1beta1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deployment
+  namespace: catching
+spec:
+  selector:
+    matchLabels:
+      app: redis-app
+      env: dev
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: redis-app
+        env: dev
+    spec:
+      containers:
+      - name: redis-deployment  # pod creation using image: redis
+        image: redis
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 6379
+
+# Service Management For Port-Forwarding.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-deployment-clusterip
+  namespace: catching
+spec:
+  selector:
+    app: redis-app
+    env: dev
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+
+# Creating Application LoadBalancer Endpoint.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-deployment-loadbalancer
+  namespace: catching
+spec:
+  selector:
+    app: redis-app
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: LoadBalancer
+
+
+# kubectl apply -f redis-deployment.yaml

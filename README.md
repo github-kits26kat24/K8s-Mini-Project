@@ -1,1 +1,0 @@
-# K8s-Mini-Project
